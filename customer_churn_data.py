@@ -74,3 +74,13 @@ plt.title("Age Distribution by Churn")
 plt.xlabel("Churn (0 = No, 1 = Yes)")
 plt.ylabel("Age")
 plt.show()
+
+# Adding Age Groups
+bins = [18, 30, 45, 60, 70]
+labels = ["18-29", "30-44", "45-59", "60-69"]
+df["AgeGroup"] = pd.cut(df["Age"], bins=bins, labels=labels)
+
+# Visualization
+sns.countplot(x="AgeGroup", hue="Churn", data=df, palette="pastel")
+plt.title("Churn by Age Group")
+plt.show()
