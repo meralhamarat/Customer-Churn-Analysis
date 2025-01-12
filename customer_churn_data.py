@@ -39,7 +39,7 @@ print("\nDataset info:")
 print(df.info())
 
 # Save to CSV file
-file_path = "customer_churn.csv"
+file_path = "file_path = "customer_churn_enhanced.csv"
 df.to_csv(file_path, index=False)
 print(f"\nDataset saved to {file_path}")
 
