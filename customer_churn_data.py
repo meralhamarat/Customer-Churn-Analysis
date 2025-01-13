@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, StratifiedKFold, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, confusion_matrix
 
@@ -80,6 +80,53 @@ model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
 print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
 print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+# Feature importance visualization
+feature_importances = model.feature_importances_
+features_list = X.columns
+plt.figure(figsize=(10, 6))
+sns.barplot(x=feature_importances, y=features_list)
+plt.title("Feature Importance")
+plt.xlabel("Importance")
+plt.ylabel("Features")
+plt.show()
+
+# Stratified Cross-Validation
+skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+for train_index, test_index in skf.split(X, y):
+    X_train, X_test = X.iloc[train_index], X.iloc[test_index]
+    y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+
+    model = RandomForestClassifier(random_state=42)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    
+    print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+    print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+# Hyperparameter tuning using GridSearchCV
+param_grid = {
+    'n_estimators': [100, 200, 300],
+    'max_depth': [None, 10, 20, 30],
+    'min_samples_split': [2, 5, 10],
+    'min_samples_leaf': [1, 2, 4]
+}
+
+grid_search = GridSearchCV(estimator=RandomForestClassifier(random_state=42), 
+                           param_grid=param_grid, 
+                           cv=3, 
+                           verbose=2, 
+                           n_jobs=-1)
+
+grid_search.fit(X_train, y_train)
+print("Best Parameters from Grid Search:", grid_search.best_params_)
+
+# Retraining with the best parameters
+best_model = grid_search.best_estimator_
+y_pred_best = best_model.predict(X_test)
+
+print("\nBest Model Confusion Matrix:\n", confusion_matrix(y_test, y_pred_best))
+print("\nBest Model Classification Report:\n", classification_report(y_test, y_pred_best))
 
 # Save dataset to CSV
 df.to_csv("enhanced_customer_churn.csv", index=False)
